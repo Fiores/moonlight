@@ -68,7 +68,6 @@ public class TagParser {
 		buffer.append(chunk);
 		full_data.append(chunk);
 
-		// Deleting all comments as they come. Nopony needs them. Useless.
 		int comment_start;
 
 		while ((comment_start = buffer.indexOf(COMM_START)) != -1) {
@@ -100,7 +99,17 @@ public class TagParser {
 			j = buffer.indexOf(TAG_END, i);
 
 			if (i == -1 || (e_index != -1 && i > e_index)) break;
+
+			int breaker = buffer.indexOf(TAG_START, i + 1);
+
 			if (j == -1 || (e_index != -1 && j >= e_index)) break;
+
+			// detecting broken tags inclusion problems
+			if (breaker != -1 && breaker < j) {
+				j = breaker - 1;
+				step();
+				continue;
+			}
 
 			Tag tag = new Tag();
 			tag.type = Type.OPENING;
@@ -191,8 +200,8 @@ public class TagParser {
 		prev += j + 1;
 	}
 
-	public static interface TagHandler {
-		public void handle(Tag tag);
+	public interface TagHandler {
+		void handle(Tag tag);
 	}
 
 }
